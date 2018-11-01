@@ -18,7 +18,11 @@ jobs:
       - run: |
           docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD quay.io
           docker build -t quay.io/ktbartholomew/github-proxy:$CIRCLE_SHA1 .
+          docker tag quay.io/ktbartholomew/github-proxy:$CIRCLE_SHA1 quay.io/ktbartholomew/github-proxy:latest
+          docker tag quay.io/ktbartholomew/github-proxy:$CIRCLE_SHA1 quay.io/ktbartholomew/github-proxy:master
           docker push quay.io/ktbartholomew/github-proxy:$CIRCLE_SHA1
+          docker push quay.io/ktbartholomew/github-proxy:latest
+          docker push quay.io/ktbartholomew/github-proxy:master
 workflows:
   version: 2
   workflow:
