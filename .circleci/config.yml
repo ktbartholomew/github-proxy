@@ -1,0 +1,36 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.11
+    working_directory: /go/src/github.com/ktbartholomew/github-proxy
+    steps:
+      - checkout
+      - run: go build -v -a ./...
+  publish_image:
+    docker:
+      - image: circleci/golang:1.11
+    working_directory: /go/src/github.com/ktbartholomew/github-proxy
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: |
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD quay.io
+          docker build -t quay.io/ktbartholomew/github-proxy:$CIRCLE_SHA1 .
+          docker tag quay.io/ktbartholomew/github-proxy:$CIRCLE_SHA1 quay.io/ktbartholomew/github-proxy:latest
+          docker tag quay.io/ktbartholomew/github-proxy:$CIRCLE_SHA1 quay.io/ktbartholomew/github-proxy:master
+          docker push quay.io/ktbartholomew/github-proxy:$CIRCLE_SHA1
+          docker push quay.io/ktbartholomew/github-proxy:latest
+          docker push quay.io/ktbartholomew/github-proxy:master
+workflows:
+  version: 2
+  workflow:
+    jobs:
+      - build
+      - publish_image:
+          requires:
+            - build
+          filters:
+            branches:
+              only: master
